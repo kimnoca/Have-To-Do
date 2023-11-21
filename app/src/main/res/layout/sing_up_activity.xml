@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context=".controller.LoginActivity">
+    tools:context=".controller.SingUpActivity">
 
     <TextView
         android:layout_width="match_parent"
@@ -17,14 +17,21 @@
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="120dp">
-    </Space>
+        android:layout_height="120dp"></Space>
 
     <EditText
-        android:id="@+id/idEditText"
+        android:id="@+id/emailEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="이메일">
+
+    </EditText>
+
+    <EditText
+        android:id="@+id/userNameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="이름">
 
     </EditText>
 
@@ -38,28 +45,27 @@
 
     </EditText>
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="30dp">
-    </Space>
-
-    <Button
-        android:id="@+id/loginButton"
+    <EditText
+        android:id="@+id/passwordCheckEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="로그인"
-        android:layout_marginTop="10dp"></Button>
+        android:hint="비밀번호 확인"
+        android:inputType="textPassword">
 
-    <TextView
+    </EditText>
+
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="30dp"></Space>
+
+    <Button
         android:id="@+id/singUpButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:text="회원가입"
-        android:textSize="15dp"
-        android:layout_marginTop="10dp">></TextView>
+        android:layout_marginTop="10dp"
+        android:enabled="false"
+        android:text="회원가입"></Button>
 
 
 </LinearLayout>

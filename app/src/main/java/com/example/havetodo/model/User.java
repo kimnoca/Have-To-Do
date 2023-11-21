@@ -10,8 +10,15 @@ import androidx.room.Room;
 public class User {
     @PrimaryKey(autoGenerate = true)
     public int userId;
+    @ColumnInfo(name = "userName")
+    public String userName;
     @ColumnInfo(name = "userEmail")
     public String userEmail;
     @ColumnInfo(name = "userPassword")
     public String userPassword;
+
+//    public User(String email, String name, String password) {
+//
+//    }
+
 }
