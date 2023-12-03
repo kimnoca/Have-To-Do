@@ -4,7 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".controller.MainActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".controller.MainActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/todoListView"
+        android:layout_width="match_parent"
+        android:layout_height="615dp" />
+
+    <Button
+        android:id="@+id/plusBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="+"
+        android:textSize="40dp">
+
+    </Button>
 
 </LinearLayout>

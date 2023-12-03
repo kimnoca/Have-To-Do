@@ -13,6 +13,7 @@ import android.widget.EditText;
 
 import com.example.havetodo.R;
 import com.example.havetodo.model.AppDatabase;
+import com.example.havetodo.model.TODODao;
 import com.example.havetodo.model.User;
 import com.example.havetodo.model.UserDao;
 
@@ -39,7 +40,7 @@ public class SingUpActivity extends AppCompatActivity {
 
         AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-name").allowMainThreadQueries().build();
         UserDao userDao = db.userDao();
-
+        TODODao todoDao = db.todoDao();
         emailInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -121,6 +122,7 @@ public class SingUpActivity extends AppCompatActivity {
                 userDao.insert(user);
 
                 Intent intent = new Intent(SingUpActivity.this, LoginActivity.class);
+
                 startActivity(intent);
             }
         });
@@ -133,7 +135,6 @@ public class SingUpActivity extends AppCompatActivity {
         String password = passwordInput.getText().toString();
         String passwordCheck = passwordCheckInput.getText().toString();
 
-        // 모든 필드가 비어 있지 않으면 버튼을 활성화합니다.
         singUpButton.setEnabled(!email.isEmpty() && !name.isEmpty() &&
                 !password.isEmpty() && !passwordCheck.isEmpty());
     }

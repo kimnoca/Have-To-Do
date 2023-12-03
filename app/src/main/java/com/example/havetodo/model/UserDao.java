@@ -17,4 +17,6 @@ public interface UserDao {
     @Query("SELECT userName FROM User WHERE userEmail = :userEmail")
     String getUserNameByUserEmail(String userEmail);
 
+    @Query("SELECT userId FROM User Where userEmail = :userEmail")
+    int getUserIDByUserEmail(String userEmail);
 }

@@ -3,10 +3,11 @@ package com.example.havetodo.model;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.Room;
 
-@Entity(tableName = "User")
+@Entity(tableName = "User", indices = {@Index(value = {"userEmail"}, unique = true)})
 public class User {
     @PrimaryKey(autoGenerate = true)
     public int userId;
@@ -16,9 +17,5 @@ public class User {
     public String userEmail;
     @ColumnInfo(name = "userPassword")
     public String userPassword;
-
-//    public User(String email, String name, String password) {
-//
-//    }
 
 }
