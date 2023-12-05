@@ -42,8 +42,12 @@ public class CustomDialog extends Dialog {
         atDate = todo.getAtDate();
 
         editTitle = findViewById(R.id.inputTitle);
+        editTitle.setText(title);
         editContent = findViewById(R.id.inputContent);
+        editContent.setText(content);
         timePicker = findViewById(R.id.timePicker);
+        // 여기 지금 시간 가져오기 해야함
+//        timePicker.getMinute()
         saveBtn = findViewById(R.id.saveButton);
 
         saveBtn.setOnClickListener(new View.OnClickListener() {

@@ -9,11 +9,16 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import com.example.havetodo.R;
+import com.example.havetodo.model.AppDatabase;
 import com.example.havetodo.model.TODO;
+import com.example.havetodo.model.TODODao;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ItemViewHolder>
         implements ItemTouchHelperListener, OnDialogListener {
@@ -78,17 +83,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ItemViewHolder
         //수정 버튼 클릭시 다이얼로그 생성
         CustomDialog dialog = new CustomDialog(context, position, items.get(position));
 
-        //화면 사이즈 구하기
-        DisplayMetrics dm = context.getApplicationContext().getResources().getDisplayMetrics();
-        int width = dm.widthPixels;
-        int height = dm.heightPixels;
-
-        //다이얼로그 사이즈 세팅
-        WindowManager.LayoutParams wm = dialog.getWindow().getAttributes();
-        wm.copyFrom(dialog.getWindow().getAttributes());
-        wm.width = (int) (width * 0.7);
-        wm.height = height / 2;
-
         //다이얼로그 Listener 세팅
         dialog.setDialogListener(this);
 
@@ -100,6 +94,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ItemViewHolder
     //오른쪽 버튼 누르면 아이템 삭제
     @Override
     public void onRightClick(int position, RecyclerView.ViewHolder viewHolder) {
+        AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, "database-name").allowMainThreadQueries().build();
+        TODODao todoDao = db.todoDao();
+        todoDao.delete(items.get(position));
         items.remove(position);
         notifyItemRemoved(position);
     }
@@ -130,7 +127,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ItemViewHolder
         public void onBind(TODO todo) {
             list_title.setText(todo.getTodoTitle());
             list_content.setText(todo.getTodoContent());
-            list_date.setText(String.valueOf(todo.getAtDate()));
+            Date atDate = todo.getAtDate();
+            SimpleDateFormat formatter = new SimpleDateFormat("HH시:mm분");
+            String formattedDate = formatter.format(atDate);
+
+            list_date.setText(formattedDate);
         }
     }
 

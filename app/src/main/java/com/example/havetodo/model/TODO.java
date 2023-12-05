@@ -13,7 +13,9 @@ import java.util.Date;
 @TypeConverters({Converters.class})
 public class TODO {
 
-    public TODO(){}
+    public TODO() {
+    }
+
     public TODO(String todoTitle, String todoContent, Date atDate, int authorID) {
         this.todoTitle = todoTitle;
         this.todoContent = todoContent;
@@ -24,6 +26,7 @@ public class TODO {
     public int getTodoID() {
         return todoID;
     }
+
     public String getTodoTitle() {
         return todoTitle;
     }
@@ -50,5 +53,7 @@ public class TODO {
     public Date atDate;
     @ColumnInfo(name = "author_id")
     public int authorID;
+    @ColumnInfo(name = "is_activated")
+    public boolean isActivated;
 
 }

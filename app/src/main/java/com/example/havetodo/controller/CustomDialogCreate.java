@@ -46,13 +46,15 @@ public class CustomDialogCreate extends Dialog {
 
                 Calendar calendar = Calendar.getInstance();
 
-                int hour, minute;
+                int hour, minute, second;
 
                 hour = timePicker.getHour();
                 minute = timePicker.getMinute();
+                second = 0;
 
                 calendar.set(Calendar.HOUR_OF_DAY, hour);
                 calendar.set(Calendar.MINUTE, minute);
+                calendar.set(Calendar.SECOND, second);
 
                 TODO updatedTodo = new TODO();// Assuming ID is set elsewhere
                 updatedTodo.todoTitle = editTitle.getText().toString();

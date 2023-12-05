@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Insert;
 import androidx.room.Room;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -38,6 +40,16 @@ public class LoginActivity extends AppCompatActivity {
 
         AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-name").allowMainThreadQueries().build();
         UserDao userDao = db.userDao();
+
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        int storedUserId = sharedPreferences.getInt("userId", -1);
+
+        // 저장된 userId가 있다면 MainActivity로 이동
+        if (storedUserId != -1) {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish(); // LoginActivity를 스택에서 제거
+        }
 
         emailInput.addTextChangedListener(new TextWatcher() {
             @Override
@@ -87,7 +99,13 @@ public class LoginActivity extends AppCompatActivity {
                     intent.putExtra("USER_EMAIL", email);
                     intent.putExtra("USER_ID", userID);
                     startActivity(intent);
-                    // login 성공 -> 여기서 user email 이나 user(pk)를 넘겨 줘야함 그래야 개인화 가능
+
+                    // 로그인 벙보 저장 저장
+                    SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("USER_ID", userID);
+                    editor.apply();
+
                 }
             }
         });

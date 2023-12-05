@@ -7,14 +7,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.havetodo.R;
 import com.example.havetodo.model.AppDatabase;
@@ -24,15 +28,16 @@ import com.example.havetodo.model.UserDao;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView todolistView;
-
     ListAdapter adapter;
     ItemTouchHelper helper;
-
     Button button;
+    TextView nickNameView;
+    Button logoutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,18 +63,39 @@ public class MainActivity extends AppCompatActivity {
 
         AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-name").allowMainThreadQueries().build();
         TODODao todoDao = db.todoDao();
-
         Intent intent = getIntent();
-        int authorID = intent.getIntExtra("USER_ID", 1);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        int storedUserId = sharedPreferences.getInt("userId", -1); // 기본값 -1
+        int authorID;
         String userEmail = intent.getStringExtra("USER_EMAIL");
+        UserDao userDao = db.userDao();
 
-        ArrayList<TODO> todos = new ArrayList<>(todoDao.getAllTODOByAuthorID(authorID));
 
-        for (TODO todo : todos) {
-            adapter.addItem(todo);
+        Log.d("TAG", "저장된 userID" + storedUserId);
+        if (storedUserId != -1) {
+            authorID = storedUserId;
+        } else {
+            authorID = intent.getIntExtra("USER_ID", 1);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("userId", authorID);
+            editor.apply();
         }
-        Log.d("TAG" , String.valueOf(authorID));
+        List<TODO> fetchedTodos = todoDao.getAllTODOByAuthorID(authorID);
+        ArrayList<TODO> todos = fetchedTodos != null ? new ArrayList<>(fetchedTodos) : new ArrayList<>();
+        if (!todos.isEmpty()) {
+            for (TODO todo : todos) {
+                adapter.addItem(todo);
+            }
+        }
+        String userNickName = userDao.getUserNameByUserEmail(authorID);
 
+        nickNameView = findViewById(R.id.userNameView);
+
+        nickNameView.setText(userNickName);
+
+        Log.d("TAG", String.valueOf(authorID));
+        scheduleNextAlarm();
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                             adapter.addItem(todo);
                             adapter.notifyItemChanged(position);
                         }
+                        scheduleNextAlarm();
 
                     }
                 });
@@ -95,7 +122,74 @@ public class MainActivity extends AppCompatActivity {
                 dialog.show();
             }
         });
+        logoutButton = findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.clear();
+                editor.apply(); // 또는 commit()을 사용
+                Intent intent1 = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent1);
+                finish();
+            }
+        });
+    }
 
+    private void scheduleNextAlarm() {
+        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-name").allowMainThreadQueries().build();
+        TODODao todoDao = db.todoDao();  // Room database instance 가져오기
+        Intent intent = getIntent();
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        int storedUserId = sharedPreferences.getInt("userId", -1); // 기본값 -1
+        int authorID;
+        if (storedUserId != -1) {
+            authorID = storedUserId;
+        } else {
+            authorID = intent.getIntExtra("USER_ID", 1);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("userId", authorID);
+            editor.apply();
+        }
+
+        List<TODO> todo = todoDao.getNextAlarm(authorID);
+
+        if (todo != null && !todo.isEmpty()) {
+            Log.d("TAG", "여기?/");
+            setAlarm(todo.get(0).getAtDate(), todo.get(0).getTodoID());
+        }
+    }
+
+    private void setAlarm(Date atDate, int todoID) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+        intent.putExtra("alarmId", todoID);
+        Intent intent1 = getIntent();
+
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        int storedUserId = sharedPreferences.getInt("userId", -1); // 기본값 -1
+        int authorID;
+        if (storedUserId != -1) {
+            authorID = storedUserId;
+        } else {
+            authorID = intent1.getIntExtra("USER_ID", -1);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("userId", authorID);
+            editor.apply();
+        }
+        intent.putExtra("USER_ID", authorID);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, todoID, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+
+        long timeInMillis = atDate.getTime();
+        Log.d("tag", "alarmID == " + todoID);
+        Log.d("tag", String.valueOf(timeInMillis));
+        // SDK 버전에 따른 조건 처리
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+        }
     }
 
     private void setUpRecyclerView() {
